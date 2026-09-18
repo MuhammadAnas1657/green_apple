@@ -11,6 +11,14 @@ header.querySelectorAll('nav a').forEach(link=>link.addEventListener('click',()=
 const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');revealObserver.unobserve(entry.target)}}),{threshold:.1});
 document.querySelectorAll('.reveal').forEach(element=>revealObserver.observe(element));
 
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 50) {
+    header.classList.add('scrolled');
+  } else {
+    header.classList.remove('scrolled');
+  }
+});
+
 const shell=document.getElementById('panoramaShell');
 const panoramaImage=document.getElementById('panoramaImage');
 const sceneTitle=document.getElementById('sceneTitle');
@@ -35,6 +43,33 @@ const lightboxCaption=document.getElementById('lightboxCaption');
 document.querySelectorAll('.gallery-item').forEach(item=>item.addEventListener('click',()=>{lightboxImage.src=item.dataset.full;lightboxImage.alt=item.querySelector('img').alt;lightboxCaption.textContent=item.querySelector('span').textContent;lightbox.showModal()}));
 document.getElementById('closeLightbox').addEventListener('click',()=>lightbox.close());
 lightbox.addEventListener('click',event=>{if(event.target===lightbox)lightbox.close()});
+
+const reelFrames=[...document.querySelectorAll('.reel-frame[data-facebook]')];
+function reelEmbedUrl(url){return `https://web.facebook.com/plugins/post.php?href=${encodeURIComponent(url)}&show_text=false&width=500`}
+function loadReel(frame){
+  const iframe=frame.querySelector('iframe');
+  if(!iframe.src)iframe.src=reelEmbedUrl(frame.dataset.facebook);
+}
+function startReel(frame){
+  loadReel(frame);
+  frame.classList.add('is-playing');
+}
+function stopReel(frame){
+  const iframe=frame.querySelector('iframe');
+  iframe.removeAttribute('src');
+  frame.classList.remove('is-playing');
+}
+const reelObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+  entry.target.dataset.inView=String(entry.isIntersecting);
+  if(entry.isIntersecting)loadReel(entry.target);else stopReel(entry.target);
+}),{threshold:.42,rootMargin:'0px 0px -8%'});
+reelFrames.forEach(frame=>{
+  reelObserver.observe(frame);
+  frame.addEventListener('pointerenter',()=>loadReel(frame));
+  frame.addEventListener('focusin',()=>loadReel(frame));
+  frame.querySelector('.reel-play').addEventListener('click',()=>startReel(frame));
+  frame.addEventListener('pointerleave',()=>{if(frame.dataset.inView!=='true')stopReel(frame)});
+});
 
 const dateInput=document.getElementById('date');
 dateInput.min=new Date().toISOString().split('T')[0];
