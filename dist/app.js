@@ -19,6 +19,23 @@ window.addEventListener('scroll', () => {
   }
 });
 
+const heroSlides=[...document.querySelectorAll('.hero-slide')];
+const heroDots=[...document.querySelectorAll('.hero-dot')];
+const heroPause=document.querySelector('.hero-pause');
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
+let heroIndex=0,heroTimer=null,heroPaused=reduceMotion.matches;
+if(heroPaused){heroPause.setAttribute('aria-pressed','true');heroPause.setAttribute('aria-label','Play banner slideshow');heroPause.querySelector('span').textContent='▶'}
+function showHero(index){
+  heroIndex=(index+heroSlides.length)%heroSlides.length;
+  heroSlides.forEach((slide,i)=>{const active=i===heroIndex;slide.classList.toggle('active',active);slide.setAttribute('aria-hidden',String(!active))});
+  heroDots.forEach((dot,i)=>{const active=i===heroIndex;dot.classList.toggle('active',active);dot.setAttribute('aria-pressed',String(active))});
+}
+function restartHero(){clearInterval(heroTimer);if(!heroPaused)heroTimer=setInterval(()=>showHero(heroIndex+1),7200)}
+heroDots.forEach((dot,index)=>dot.addEventListener('click',()=>{showHero(index);restartHero()}));
+heroPause.addEventListener('click',()=>{heroPaused=!heroPaused;heroPause.setAttribute('aria-pressed',String(heroPaused));heroPause.setAttribute('aria-label',heroPaused?'Play banner slideshow':'Pause banner slideshow');heroPause.querySelector('span').textContent=heroPaused?'▶':'Ⅱ';restartHero()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)clearInterval(heroTimer);else restartHero()});
+showHero(0);restartHero();
+
 const shell=document.getElementById('panoramaShell');
 const panoramaImage=document.getElementById('panoramaImage');
 const sceneTitle=document.getElementById('sceneTitle');
