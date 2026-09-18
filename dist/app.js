@@ -20,6 +20,7 @@ window.addEventListener('scroll', () => {
 });
 
 const heroSlides=[...document.querySelectorAll('.hero-slide')];
+const heroMessages=[...document.querySelectorAll('.hero-message')];
 const heroDots=[...document.querySelectorAll('.hero-dot')];
 const heroPause=document.querySelector('.hero-pause');
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
@@ -28,6 +29,7 @@ if(heroPaused){heroPause.setAttribute('aria-pressed','true');heroPause.setAttrib
 function showHero(index){
   heroIndex=(index+heroSlides.length)%heroSlides.length;
   heroSlides.forEach((slide,i)=>{const active=i===heroIndex;slide.classList.toggle('active',active);slide.setAttribute('aria-hidden',String(!active))});
+  heroMessages.forEach((message,i)=>{const active=i===heroIndex;message.classList.toggle('active',active);message.setAttribute('aria-hidden',String(!active))});
   heroDots.forEach((dot,i)=>{const active=i===heroIndex;dot.classList.toggle('active',active);dot.setAttribute('aria-pressed',String(active))});
 }
 function restartHero(){clearInterval(heroTimer);if(!heroPaused)heroTimer=setInterval(()=>showHero(heroIndex+1),7200)}
@@ -90,9 +92,26 @@ reelFrames.forEach(frame=>{
 
 const dateInput=document.getElementById('date');
 dateInput.min=new Date().toISOString().split('T')[0];
+const occasionSelect=document.getElementById('occasionSelect');
+const occasionInput=document.getElementById('occasion');
+const occasionTrigger=document.getElementById('occasionTrigger');
+const occasionValue=document.getElementById('occasionValue');
+const occasionMenu=document.getElementById('occasionMenu');
+const occasionOptions=[...occasionMenu.querySelectorAll('[role="option"]')];
+const occasionField=occasionSelect.closest('.select-field');
+const occasionError=document.getElementById('occasionError');
+function setOccasionOpen(open){occasionMenu.hidden=!open;occasionTrigger.setAttribute('aria-expanded',String(open));if(open)(occasionOptions.find(option=>option.getAttribute('aria-selected')==='true')||occasionOptions[0]).focus()}
+occasionTrigger.addEventListener('click',()=>setOccasionOpen(occasionMenu.hidden));
+occasionTrigger.addEventListener('keydown',event=>{if(event.key==='ArrowDown'||event.key==='Enter'||event.key===' '){event.preventDefault();setOccasionOpen(true)}});
+occasionOptions.forEach((option,index)=>{
+  option.addEventListener('click',()=>{occasionInput.value=option.dataset.value;occasionValue.textContent=option.textContent;occasionOptions.forEach(item=>item.setAttribute('aria-selected',String(item===option)));occasionField.classList.remove('is-invalid');occasionTrigger.removeAttribute('aria-invalid');occasionError.hidden=true;setOccasionOpen(false);occasionTrigger.focus()});
+  option.addEventListener('keydown',event=>{if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();occasionOptions[(index+(event.key==='ArrowDown'?1:-1)+occasionOptions.length)%occasionOptions.length].focus()}if(event.key==='Escape'){setOccasionOpen(false);occasionTrigger.focus()}});
+});
+document.addEventListener('pointerdown',event=>{if(!occasionSelect.contains(event.target)&&!occasionMenu.hidden)setOccasionOpen(false)});
 document.getElementById('bookingForm').addEventListener('submit',event=>{
   event.preventDefault();
   if(!event.currentTarget.reportValidity())return;
+  if(!occasionInput.value){occasionField.classList.add('is-invalid');occasionTrigger.setAttribute('aria-invalid','true');occasionError.hidden=false;occasionTrigger.focus();return}
   const data=new FormData(event.currentTarget);
   const dateValue=new Date(`${data.get('date')}T12:00:00`).toLocaleDateString('en-PK',{day:'numeric',month:'long',year:'numeric'});
   const message=[
