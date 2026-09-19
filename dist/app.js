@@ -8,7 +8,7 @@ themeToggle.addEventListener('click',()=>{body.classList.toggle('dark');localSto
 menuToggle.addEventListener('click',()=>{const open=header.classList.toggle('menu-open');menuToggle.setAttribute('aria-expanded',String(open))});
 header.querySelectorAll('nav a').forEach(link=>link.addEventListener('click',()=>{header.classList.remove('menu-open');menuToggle.setAttribute('aria-expanded','false')}));
 
-const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');revealObserver.unobserve(entry.target)}}),{threshold:.1});
+const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible')}else{entry.target.classList.remove('visible')}}),{threshold:.1});
 document.querySelectorAll('.reveal').forEach(element=>revealObserver.observe(element));
 
 window.addEventListener('scroll', () => {
@@ -17,24 +17,40 @@ window.addEventListener('scroll', () => {
   } else {
     header.classList.remove('scrolled');
   }
+
+  // Horizontal scroll for pinned sections
+  document.querySelectorAll('.h-scroll-wrapper').forEach(wrapper => {
+    const track = wrapper.querySelector('.h-scroll-track');
+    if (!track) return;
+    
+    const rect = wrapper.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    
+    const totalScroll = rect.height - windowHeight;
+    let progress = -rect.top / totalScroll;
+    
+    progress = Math.max(0, Math.min(1, progress));
+    
+    const maxTranslate = track.scrollWidth - window.innerWidth;
+    if (maxTranslate > 0) {
+      track.style.transform = `translate3d(-${progress * maxTranslate}px, 0, 0)`;
+    }
+  });
 });
 
 const heroSlides=[...document.querySelectorAll('.hero-slide')];
 const heroMessages=[...document.querySelectorAll('.hero-message')];
 const heroDots=[...document.querySelectorAll('.hero-dot')];
-const heroPause=document.querySelector('.hero-pause');
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
 let heroIndex=0,heroTimer=null,heroPaused=reduceMotion.matches;
-if(heroPaused){heroPause.setAttribute('aria-pressed','true');heroPause.setAttribute('aria-label','Play banner slideshow');heroPause.querySelector('span').textContent='▶'}
 function showHero(index){
   heroIndex=(index+heroSlides.length)%heroSlides.length;
   heroSlides.forEach((slide,i)=>{const active=i===heroIndex;slide.classList.toggle('active',active);slide.setAttribute('aria-hidden',String(!active))});
   heroMessages.forEach((message,i)=>{const active=i===heroIndex;message.classList.toggle('active',active);message.setAttribute('aria-hidden',String(!active))});
   heroDots.forEach((dot,i)=>{const active=i===heroIndex;dot.classList.toggle('active',active);dot.setAttribute('aria-pressed',String(active))});
 }
-function restartHero(){clearInterval(heroTimer);if(!heroPaused)heroTimer=setInterval(()=>showHero(heroIndex+1),7200)}
-heroDots.forEach((dot,index)=>dot.addEventListener('click',()=>{showHero(index);restartHero()}));
-heroPause.addEventListener('click',()=>{heroPaused=!heroPaused;heroPause.setAttribute('aria-pressed',String(heroPaused));heroPause.setAttribute('aria-label',heroPaused?'Play banner slideshow':'Pause banner slideshow');heroPause.querySelector('span').textContent=heroPaused?'▶':'Ⅱ';restartHero()});
+function restartHero(){clearInterval(heroTimer);if(!heroPaused)heroTimer=setInterval(()=>showHero(heroIndex+1),3000)}
+if(heroDots.length) heroDots.forEach((dot,index)=>dot.addEventListener('click',()=>{showHero(index);restartHero()}));
 document.addEventListener('visibilitychange',()=>{if(document.hidden)clearInterval(heroTimer);else restartHero()});
 showHero(0);restartHero();
 
