@@ -1,6 +1,5 @@
 /* Horizontal Scroll Layout for Reels and Reviews */
 .h-scroll-wrapper {
-  height: 300vh;
   position: relative;
 }
 
@@ -9,22 +8,35 @@
   top: 0;
   height: 100vh;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
   overflow: hidden;
+  padding: 8vh 0; /* Ensures it doesn't touch the very edges */
+}
+
+.h-scroll-sticky > .section-index,
+.h-scroll-sticky > .section-heading,
+.h-scroll-sticky > .reviews-heading {
+  padding: 0 max(5vw, 32px);
 }
 
 .h-scroll-track {
   display: flex;
   flex-wrap: nowrap;
   gap: 40px;
-  padding: 0 5vw;
+  padding: 0 0 0 max(5vw, 32px);
   will-change: transform;
   width: max-content;
 }
 
+.h-scroll-track::after {
+  content: "";
+  flex: 0 0 max(5vw, 32px);
+}
+
 /* Adjustments for Reels */
-.reels {
-  padding-bottom: 0; 
+.reels, .reviews {
+  padding: 0; 
 }
 .reel-embeds.h-scroll-track {
   align-items: center;
@@ -34,17 +46,12 @@
   width: 340px;
 }
 .reel-offset {
-  transform: translateY(80px);
+  transform: translateY(40px);
 }
 
 /* Adjustments for Reviews */
-.reviews {
-  padding-bottom: 0;
-}
 .review-grid.h-scroll-track {
   align-items: center;
-  margin-top: 50px;
-  padding-bottom: 80px;
 }
 .review-card {
   flex: 0 0 380px;
@@ -58,9 +65,9 @@
 }
 
 @media(max-width:720px) {
-  .h-scroll-wrapper { height: 200vh; }
   .h-scroll-track { gap: 20px; }
   .reel-player { flex: 0 0 280px; width: 280px; }
   .reel-offset { transform: none; margin-top: 20px; }
   .review-card { flex: 0 0 300px; width: 300px; }
 }
+

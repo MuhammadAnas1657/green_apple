@@ -8,8 +8,27 @@ themeToggle.addEventListener('click',()=>{body.classList.toggle('dark');localSto
 menuToggle.addEventListener('click',()=>{const open=header.classList.toggle('menu-open');menuToggle.setAttribute('aria-expanded',String(open))});
 header.querySelectorAll('nav a').forEach(link=>link.addEventListener('click',()=>{header.classList.remove('menu-open');menuToggle.setAttribute('aria-expanded','false')}));
 
-const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible')}else{entry.target.classList.remove('visible')}}),{threshold:.1});
+const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible')}else{entry.target.classList.remove('visible')}}),{threshold:0.01,rootMargin:'0px 0px 100px 0px'});
 document.querySelectorAll('.reveal').forEach(element=>revealObserver.observe(element));
+
+function updateHScrollHeights() {
+  document.querySelectorAll('.h-scroll-wrapper').forEach(wrapper => {
+    const track = wrapper.querySelector('.h-scroll-track');
+    if (!track) return;
+    const windowHeight = window.innerHeight;
+    const maxTranslate = track.scrollWidth - track.parentElement.clientWidth;
+    if (maxTranslate > 0) {
+      wrapper.style.height = `${windowHeight + Math.round(maxTranslate * 0.85)}px`;
+    } else {
+      wrapper.style.height = 'auto';
+    }
+  });
+}
+
+window.addEventListener('resize', updateHScrollHeights);
+window.addEventListener('load', updateHScrollHeights);
+document.addEventListener('DOMContentLoaded', updateHScrollHeights);
+setTimeout(updateHScrollHeights, 300);
 
 window.addEventListener('scroll', () => {
   if (window.scrollY > 50) {
@@ -27,11 +46,12 @@ window.addEventListener('scroll', () => {
     const windowHeight = window.innerHeight;
     
     const totalScroll = rect.height - windowHeight;
+    if (totalScroll <= 0) return;
+
     let progress = -rect.top / totalScroll;
-    
     progress = Math.max(0, Math.min(1, progress));
     
-    const maxTranslate = track.scrollWidth - window.innerWidth;
+    const maxTranslate = track.scrollWidth - track.parentElement.clientWidth;
     if (maxTranslate > 0) {
       track.style.transform = `translate3d(-${progress * maxTranslate}px, 0, 0)`;
     }
