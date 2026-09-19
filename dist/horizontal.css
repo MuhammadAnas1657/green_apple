@@ -71,3 +71,50 @@
   .review-card { flex: 0 0 300px; width: 300px; }
 }
 
+/* Reviews stay compact instead of creating an artificial vertical scroll runway. */
+.reviews .h-scroll-wrapper {
+  height: auto !important;
+}
+.reviews .h-scroll-sticky {
+  position: relative;
+  height: auto;
+  min-height: 0;
+  justify-content: flex-start;
+  padding: 96px 0;
+}
+.reviews .review-grid.h-scroll-track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: auto;
+  padding: 0 max(5vw, 32px);
+  gap: 16px;
+  transform: none !important;
+}
+.reviews .review-card {
+  width: auto;
+  min-width: 0;
+}
+
+@media(max-width:900px) and (min-width:721px) {
+  .reviews .review-grid.h-scroll-track { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media(max-width:720px) {
+  .reviews .h-scroll-sticky { padding: 72px 0 58px; overflow: visible; }
+  .reviews .review-grid.h-scroll-track {
+    display: flex;
+    width: 100%;
+    padding: 0 23px 14px;
+    gap: 14px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .reviews .review-grid.h-scroll-track::-webkit-scrollbar { display: none; }
+  .reviews .review-card {
+    flex: 0 0 min(82vw, 310px);
+    width: min(82vw, 310px);
+    scroll-snap-align: start;
+  }
+}

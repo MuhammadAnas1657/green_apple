@@ -12,7 +12,7 @@ const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{i
 document.querySelectorAll('.reveal').forEach(element=>revealObserver.observe(element));
 
 function updateHScrollHeights() {
-  document.querySelectorAll('.h-scroll-wrapper').forEach(wrapper => {
+  document.querySelectorAll('.h-scroll-wrapper:not(.h-scroll-native)').forEach(wrapper => {
     const track = wrapper.querySelector('.h-scroll-track');
     if (!track) return;
     const windowHeight = window.innerHeight;
@@ -38,7 +38,7 @@ window.addEventListener('scroll', () => {
   }
 
   // Horizontal scroll for pinned sections
-  document.querySelectorAll('.h-scroll-wrapper').forEach(wrapper => {
+  document.querySelectorAll('.h-scroll-wrapper:not(.h-scroll-native)').forEach(wrapper => {
     const track = wrapper.querySelector('.h-scroll-track');
     if (!track) return;
     
